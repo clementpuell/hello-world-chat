@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Hello World Chat</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <div></div>
+
+    <script src="https://unpkg.com/rxjs/bundles/rxjs.umd.min.js"></script>
+    <script src="store.js"></script>
+    <script src="chat.js"></script>
+    <script src="presenter.js"></script>
+    
+    <script>
+        (function () {
+            let store = new Store();
+            let chat1 = new Chat();
+            let chat2 = new Chat();
+            let presenter = new Presenter();
+        })();
+    </script>
+</body>
+
+</html>
