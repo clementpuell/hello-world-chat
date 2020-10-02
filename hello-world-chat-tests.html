@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Hello World Chat Tests</title>
+</head>
+
+<body>
+    <script src="https://unpkg.com/rxjs/bundles/rxjs.umd.min.js"></script>
+    <script src="models.js"></script>
+    <script src="store.js"></script>
+    <script src="chat.js"></script>
+    <script src="presenter.js"></script>
+
+    <script>
+        /** Test framework */
+        async function should(name, fn) {
+            try {
+                await fn();
+                let message = `"Should ${name}" succeeded.`;
+                console.log(`%c${message}`, 'color: green;');
+                document.body.innerHTML += `<p style="color: green;">${message}</p>`;
+            } catch (error) {
+                let message = `"Should ${name}" failed: ${error}.`;
+                console.error(`%c${message}`, 'color: red;');
+                document.body.innerHTML += `<p style="color: red;">${message}</p>`;
+            }
+        }
+
+        function assert(condition) {
+            if (!condition) {
+                throw new Error(`Assertion failed: ${condition}`);
+            }
+        }
+    </script>
+
+    <script>
+        (function () {
+            should('format current timestamp', () => {
+                let message = new Message('author', 'text');
+                let format = message.formatDate();
+                assert(typeof format === 'string' && format.includes(new Date().getFullYear()));
+            });
+
+            should('receive old stored messages', async () => {
+                let store = new Store();
+                let message = new Message('author', 'text');
+                await Promise.all([
+                    store.add(message),
+                    store.add(message)
+                ]);
+
+                let count = 0;
+                store.messages$.subscribe(() => count++);
+                assert(count === 2);
+            });
+
+            should('publish own messages to store', async () => {
+                let store = new Store();
+                let chat = new Chat('author', store);
+
+                await chat.post('text');
+
+                let count = 0;
+                store.messages$.subscribe(m => {
+                    count++;
+                    assert(m.text === 'text');
+                    assert(m.author === 'author');
+                });
+                assert(count === 1);
+            });
+
+            should('receive messages posted by others', async () => {
+                let store = new Store();
+                let chat1 = new Chat('author1', store);
+                let chat2 = new Chat('author2', store);
+
+                await chat2.post('text');
+
+                let count = 0;
+                chat1.messages$.subscribe(m => {
+                    count++;
+                    assert(m.author === 'author2');
+                    assert(m.type === MessageType.Received);
+                });
+                assert(count === 1);
+            });
+        })();
+    </script>
+</body>
+
+</html>

@@ -8,19 +8,52 @@
 </head>
 
 <body>
-    <div></div>
+    <div id="container">
+
+        <template id="window-template">
+            <div class="chat-window">
+                <h1>Chat <span></span></h1>
+                <div class="chat-messages"></div>
+                <form action="javascript:void(0);" class="chat-input">
+                    <input type="text" placeholder="Message" autofocus tabindex="1" />
+                    <input type="submit" value="OK" tabindex="-1" />
+                </form>
+            </div>
+        </template>
+
+        <template id="message-template">
+            <div class="chat-message">
+                <div class="message-author"></div>
+                <div class="message-timestamp"></div>
+                <div class="message-text"></div>
+            </div>
+        </template>
+
+    </div>
 
     <script src="https://unpkg.com/rxjs/bundles/rxjs.umd.min.js"></script>
+    <script src="models.js"></script>
     <script src="store.js"></script>
     <script src="chat.js"></script>
     <script src="presenter.js"></script>
-    
     <script>
+        // Entry point
         (function () {
             let store = new Store();
-            let chat1 = new Chat();
-            let chat2 = new Chat();
-            let presenter = new Presenter();
+
+            // Init n chat windows
+            let nbChats = 2;
+            let chats = [];
+            for (let i = 0; i != nbChats; i++) {
+                let chatName = String.fromCharCode(65 + i); // "A", "B", etc.
+                let instance = new Chat(chatName, store);
+                chats.push(instance);
+            }
+
+            // Draw windows and bind them to chat instances
+            let presenter = new Presenter(chats);
+            presenter.draw();
+            presenter.listen();
         })();
     </script>
 </body>
